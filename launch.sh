@@ -107,7 +107,7 @@ main() {
     if [ "$PLATFORM" = "tg3040" ] && [ -z "$DEVICE" ]; then
         export DEVICE="brick"
     fi
-    option="$(echo -e "Export Roms list\nDownload Collection" | "$progdir/bin/minui-list" --format text --header "Collection Manager" --file -)"
+    option="$(echo -e "Export Roms list\nDownload Collection\nRemove Collection" | "$progdir/bin/minui-list" --format text --header "Collection Manager" --file -)"
     exit_code=$?
 
     echo "List exit code: '$exit_code'"
@@ -123,7 +123,15 @@ main() {
             output=$("$progdir/bin/minui-keyboard"  --header "Enter Collection ID")
             import_collection "$output"
         fi
+    elif echo "$option" | grep -q "Remove Collection"; then
+        #list all the collections in the collections folder
+        collections=$(ls "$SDCARD_PATH/Collections")
+        collection=$(echo "$collections" | "$progdir/bin/minui-list" --format text --header "Select Collection to remove" --file -)
+        rm "$SDCARD_PATH/Collections/$collection"
+        show_message "Collection removed" 2
     fi
 
     exit "$exit_code"
 }
+
+main "$@" >"$LOGS_PATH/Collection Manager.txt" 2>&1
