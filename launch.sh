@@ -11,7 +11,6 @@ show_qr() {
     killall sdl2imgshow >/dev/null 2>&1 || true
     echo "$message"
     "$progdir/bin/sdl2imgshow" \
-        -i "$progdir/res/background.png" \
         -P "center" \
         -S "original" \
         -i "$USERDATA_PATH/$PAK_NAME/qr.png" \
@@ -57,7 +56,6 @@ collection_done() {
     collection="$1"
     killall sdl2imgshow >/dev/null 2>&1 || true
     "$progdir/bin/sdl2imgshow" \
-        -i "$progdir/res/background.png" \
         -f "$progdir/res/fonts/BPreplayBold.otf" \
         -s 27 \
         -c "220,220,220" \
