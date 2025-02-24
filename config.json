@@ -1,0 +1,5 @@
+{
+    "label": "Collection Manager",
+    "launch": "launch.sh",
+    "description": "Manage collections"
+}
