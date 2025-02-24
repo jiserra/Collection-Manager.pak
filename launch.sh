@@ -112,8 +112,20 @@ import_collection() {
 main() {
     if [ "$PLATFORM" = "tg3040" ] && [ -z "$DEVICE" ]; then
         export DEVICE="brick"
+        export PLATFORM="tg5040"
     fi
-    option="$(echo -e "Export Roms list\nDownload Collection\nRemove Collection" | "$progdir/bin/minui-list" --format text --header "Collection Manager" --file -)"
+
+    minui_list_file="/tmp/minui-list"
+    rm -f "$minui_list_file"
+    touch "$minui_list_file"
+
+    {
+        echo "Export Roms list"
+        echo "Download Collection"
+        echo "Remove Collection"
+    } >>"$minui_list_file"
+
+    option="$("$progdir/bin/minui-list-$PLATFORM" --format text --header "Collection Manager" --file "$minui_list_file")"
     exit_code=$?
 
     echo "List exit code: '$exit_code'"
@@ -126,7 +138,7 @@ main() {
             show_message "You need to be connected to WiFi first" 2
             return
         else
-            output=$("$progdir/bin/minui-keyboard"  --header "Enter Collection ID")
+            output=$("$progdir/bin/minui-keyboard-$PLATFORM" --header "Enter Collection ID")
             exit_code=$?
             if [ "$exit_code" -eq 0 ]; then
                 import_collection "$output"
@@ -140,7 +152,8 @@ main() {
             show_message "No collections found" 2
             exit "$exit_code"
         fi
-        collection=$(echo "$collections" | "$progdir/bin/minui-list" --format text --header "Select Collection to remove" --confirm-text "REMOVE" --cancel-text "CANCEL" --file -)
+
+        collection=$(echo "$collections" | "$progdir/bin/minui-list-$PLATFORM" --format text --header "Select Collection to remove" --confirm-text "REMOVE" --cancel-text "CANCEL" --file -)
         exit_code=$?
         if [ "$exit_code" -eq 0 ]; then
             rm "$SDCARD_PATH/Collections/$collection"
