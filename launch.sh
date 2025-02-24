@@ -168,16 +168,12 @@ main() {
         else
             output=$("$progdir/bin/minui-keyboard-$PLATFORM" --header "Enter Collection ID")
             exit_code=$?
+            #This is to manage in case the user cancels the input
             if [ "$exit_code" -eq 0 ]; then
                 import_collection "$output"
             fi
         fi
     elif echo "$option" | grep -q "^Remove Collection$"; then
-        if [ ! -d "$SDCARD_PATH/Collections" ]; then
-            show_message "No collections found" 2
-            exit "$exit_code"
-        fi
-
         #list all the collections in the collections folder
         collections=$(ls "$SDCARD_PATH/Collections")
         #if collections is empty, show message and exit
@@ -188,6 +184,7 @@ main() {
 
         collection=$(echo "$collections" | "$progdir/bin/minui-list-$PLATFORM" --format text --header "Select Collection to remove" --confirm-text "REMOVE" --cancel-text "CANCEL" --file -)
         exit_code=$?
+        #This is to manage in case the user cancels the input
         if [ "$exit_code" -eq 0 ]; then
             rm "$SDCARD_PATH/Collections/$collection"
             show_message "Collection removed" 2
