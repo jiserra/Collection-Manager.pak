@@ -3,6 +3,7 @@ echo "$0" "$@"
 progdir="$(dirname "$0")"
 cd "$progdir" || exit 1
 [ -f "$progdir/debug" ] && set -x
+PAK_NAME="$(basename "$progdir")"
 
 show_qr() {
     message="$1"
@@ -184,4 +185,4 @@ main() {
     exit "$exit_code"
 }
 
-main "$@" >"$LOGS_PATH/Collection Manager.txt" 2>&1
+main "$@" >"$LOGS_PATH/$PAK_NAME.txt" 2>&1
