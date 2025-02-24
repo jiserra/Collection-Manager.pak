@@ -97,10 +97,16 @@ import_collection() {
         -H "Expect:" \
         https://minuicm.com/api/getCollection/"$id")
 
-    title=$(echo "$response" | sed -n '1p')
-    mkdir -p "$SDCARD_PATH/Collections"
-    echo "$response" | sed '1d' > "$SDCARD_PATH/Collections/$title.txt"
-    collection_done "$title"
+    #check if the response is an error
+    if echo "$response" | grep -q "error"; then
+        show_message "Collection not found! Double check the ID" 2
+        exit 1
+    else
+        title=$(echo "$response" | sed -n '1p')
+        mkdir -p "$SDCARD_PATH/Collections"
+        echo "$response" | sed '1d' > "$SDCARD_PATH/Collections/$title.txt"
+        collection_done "$title"
+    fi
 }
 
 main() {
@@ -121,14 +127,25 @@ main() {
             return
         else
             output=$("$progdir/bin/minui-keyboard"  --header "Enter Collection ID")
-            import_collection "$output"
+            exit_code=$?
+            if [ "$exit_code" -eq 0 ]; then
+                import_collection "$output"
+            fi
         fi
     elif echo "$option" | grep -q "Remove Collection"; then
         #list all the collections in the collections folder
         collections=$(ls "$SDCARD_PATH/Collections")
-        collection=$(echo "$collections" | "$progdir/bin/minui-list" --format text --header "Select Collection to remove" --file -)
-        rm "$SDCARD_PATH/Collections/$collection"
-        show_message "Collection removed" 2
+        #if collections is empty, show message and exit
+        if [ -z "$collections" ]; then
+            show_message "No collections found" 2
+            exit "$exit_code"
+        fi
+        collection=$(echo "$collections" | "$progdir/bin/minui-list" --format text --header "Select Collection to remove" --confirm-text "REMOVE" --cancel-text "CANCEL" --file -)
+        exit_code=$?
+        if [ "$exit_code" -eq 0 ]; then
+            rm "$SDCARD_PATH/Collections/$collection"
+            show_message "Collection removed" 2
+        fi
     fi
 
     exit "$exit_code"
