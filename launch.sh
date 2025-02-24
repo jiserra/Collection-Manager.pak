@@ -2,7 +2,7 @@
 echo "$0" "$@"
 progdir="$(dirname "$0")"
 cd "$progdir" || exit 1
-set -x
+[ -f "$progdir/debug" ] && set -x
 
 show_qr() {
     message="$1"
