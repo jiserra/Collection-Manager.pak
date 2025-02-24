@@ -131,9 +131,9 @@ main() {
 
     echo "List exit code: '$exit_code'"
 
-    if echo "$option" | grep -q "Export Roms list"; then
+    if echo "$option" | grep -q "^Export Roms list$"; then
         export_roms
-    elif echo "$option" | grep -q "Download Collection"; then
+    elif echo "$option" | grep -q "^Download Collection$"; then
         enabled="$(cat /sys/class/net/wlan0/operstate)"
         if [ "$enabled" != "up" ]; then
             show_message "You need to be connected to WiFi first" 2
@@ -145,7 +145,7 @@ main() {
                 import_collection "$output"
             fi
         fi
-    elif echo "$option" | grep -q "Remove Collection"; then
+    elif echo "$option" | grep -q "^Remove Collection$"; then
         #list all the collections in the collections folder
         collections=$(ls "$SDCARD_PATH/Collections")
         #if collections is empty, show message and exit
