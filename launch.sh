@@ -107,7 +107,7 @@ import_collection() {
     else
         title=$(echo "$response" | sed -n '1p')
         mkdir -p "$SDCARD_PATH/Collections"
-        echo "$response" | sed '1d' > "$SDCARD_PATH/Collections/$title.txt"
+        echo "$response" | sed '1d' >"$SDCARD_PATH/Collections/$title.txt"
         collection_done "$title"
     fi
 }
