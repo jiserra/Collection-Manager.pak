@@ -4,6 +4,7 @@ progdir="$(dirname "$0")"
 cd "$progdir" || exit 1
 [ -f "$progdir/debug" ] && set -x
 PAK_NAME="$(basename "$progdir")"
+echo 1 >/tmp/stay_awake
 
 show_qr() {
     message="$1"
@@ -111,7 +112,15 @@ import_collection() {
     fi
 }
 
+cleanup() {
+    rm -f /tmp/stay_awake
+    rm -f /tmp/minui-list
+    killall sdl2imgshow >/dev/null 2>&1 || true
+}
+
 main() {
+    trap "cleanup" EXIT INT TERM HUP QUIT
+
     if [ "$PLATFORM" = "tg3040" ] && [ -z "$DEVICE" ]; then
         export DEVICE="brick"
         export PLATFORM="tg5040"
