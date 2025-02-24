@@ -116,6 +116,25 @@ main() {
         export PLATFORM="tg5040"
     fi
 
+    allowed_platforms="tg5040 rg35xxplus"
+    if ! echo "$allowed_platforms" | grep -q "$PLATFORM"; then
+        show_message "$PLATFORM is not a supported platform" 2
+        return 1
+    fi
+
+    if [ ! -f "$progdir/bin/minui-keyboard-$PLATFORM" ]; then
+        show_message "$progdir/bin/minui-keyboard-$PLATFORM not found" 2
+        return 1
+    fi
+    if [ ! -f "$progdir/bin/minui-list-$PLATFORM" ]; then
+        show_message "$progdir/bin/minui-list-$PLATFORM not found" 2
+        return 1
+    fi
+
+    chmod +x "$progdir/bin/minui-keyboard-$PLATFORM"
+    chmod +x "$progdir/bin/minui-list-$PLATFORM"
+    chmod +x "$progdir/bin/sdl2imgshow"
+
     minui_list_file="/tmp/minui-list"
     rm -f "$minui_list_file"
     touch "$minui_list_file"
