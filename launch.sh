@@ -175,6 +175,11 @@ main() {
             fi
         fi
     elif echo "$option" | grep -q "^Remove Collection$"; then
+        if [ ! -d "$SDCARD_PATH/Collections" ]; then
+            show_message "No collections found" 2
+            exit "$exit_code"
+        fi
+
         #list all the collections in the collections folder
         collections=$(ls "$SDCARD_PATH/Collections")
         #if collections is empty, show message and exit
