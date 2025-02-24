@@ -6,7 +6,7 @@ set -x
 
 show_qr() {
     message="$1"
-    killall sdl2imgshow
+    killall sdl2imgshow >/dev/null 2>&1 || true
     echo "$message"
     "$progdir/bin/sdl2imgshow" \
         -i "$progdir/res/background.png" \
@@ -23,9 +23,37 @@ show_qr() {
         -w
 }
 
+show_message() {
+    message="$1"
+    seconds="$2"
+
+    if [ -z "$seconds" ]; then
+        seconds="forever"
+    fi
+
+    killall sdl2imgshow >/dev/null 2>&1 || true
+    echo "$message"
+    if [ "$seconds" = "forever" ]; then
+        "$progdir/bin/sdl2imgshow" \
+            -f "$progdir/res/fonts/BPreplayBold.otf" \
+            -s 27 \
+            -c "220,220,220" \
+            -q \
+            -t "$message" >/dev/null 2>&1 &
+    else
+        "$progdir/bin/sdl2imgshow" \
+            -f "$progdir/res/fonts/BPreplayBold.otf" \
+            -s 27 \
+            -c "220,220,220" \
+            -q \
+            -t "$message" >/dev/null 2>&1
+        sleep "$seconds"
+    fi
+}
+
 collection_done() {
     collection="$1"
-    killall sdl2imgshow
+    killall sdl2imgshow >/dev/null 2>&1 || true
     "$progdir/bin/sdl2imgshow" \
         -i "$progdir/res/background.png" \
         -f "$progdir/res/fonts/BPreplayBold.otf" \
@@ -38,22 +66,30 @@ collection_done() {
 }
 
 export_roms() {
-    cd "$SDCARD_PATH" || exit 1
-    find "Roms" > roms.txt
+    enabled="$(cat /sys/class/net/wlan0/operstate)"
+    if [ "$enabled" != "up" ]; then
+        show_message "You need to be connected to WiFi first" 2
+        return
+    else
+        show_message "Exporting Roms list..."
+        cd "$SDCARD_PATH" || exit 1
+        find "Roms" | sort > roms.txt
 
-    response=$(curl -k --http1.1 POST \
-        -H "Content-Type: text/plain" \
-        -H "Expect:" \
-        --data-binary "@roms.txt" \
-        https://minuicm.com/api/generateUrl)
+        response=$(curl -k --http1.1 POST \
+            -H "Content-Type: text/plain" \
+            -H "Expect:" \
+            --data-binary "@roms.txt" \
+            https://minuicm.com/api/generateUrl)
 
-    url=$(echo "$response" | sed -n '1p')
-    echo "$response" | sed -n '2p' | base64 -d > "$progdir/qr.png"
+        url=$(echo "$response" | sed -n '1p')
+        echo "$response" | sed -n '2p' | base64 -d > "$progdir/qr.png"
 
-    show_qr "$url"
+        show_qr "$url"
+    fi
 }
 
 import_collection() {
+    show_message "Downloading Collection..."
     id="$1"
     cd "$progdir" || exit 1
     response=$(curl -k --http1.1 \
@@ -79,11 +115,15 @@ main() {
     if echo "$option" | grep -q "Export Roms list"; then
         export_roms
     elif echo "$option" | grep -q "Download Collection"; then
-        output=$("$progdir/bin/minui-keyboard"  --header "Enter Collection ID")
-        import_collection "$output"
+        enabled="$(cat /sys/class/net/wlan0/operstate)"
+        if [ "$enabled" != "up" ]; then
+            show_message "You need to be connected to WiFi first" 2
+            return
+        else
+            output=$("$progdir/bin/minui-keyboard"  --header "Enter Collection ID")
+            import_collection "$output"
+        fi
     fi
 
     exit "$exit_code"
 }
-
-main "$@" >"$LOGS_PATH/Collection Manager.txt" 2>&1
