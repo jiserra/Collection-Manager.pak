@@ -2,5 +2,6 @@
 .gitattributes export-ignore
 .gitarchiveinclude export-ignore
 .gitignore export-ignore
+development.md export-ignore
 Makefile export-ignore
 Dockerfile.sdl2imgshow export-ignore
