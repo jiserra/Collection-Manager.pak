@@ -7,13 +7,13 @@ PAK_NAME="$(basename "$progdir")"
 echo 1 >/tmp/stay_awake
 
 show_qr() {
-    message="$1"
+    message="$1" qr_file="$2"
     killall sdl2imgshow >/dev/null 2>&1 || true
     echo "$message"
     "$progdir/bin/sdl2imgshow" \
         -P "center" \
         -S "original" \
-        -i "$USERDATA_PATH/$PAK_NAME/qr.png" \
+        -i "$qr_file" \
         -f "$progdir/res/fonts/BPreplayBold.otf" \
         -s 27 \
         -c "220,220,220" \
@@ -73,19 +73,19 @@ export_roms() {
     else
         show_message "Exporting Roms list..."
         cd "$SDCARD_PATH" || exit 1
-        mkdir -p "$USERDATA_PATH/$PAK_NAME"
-        find "Roms" | sort >"$USERDATA_PATH/$PAK_NAME/roms.txt"
+        find "Roms" | sort >"$SDCARD_PATH/roms.txt"
 
         response=$(curl -k --http1.1 POST \
             -H "Content-Type: text/plain" \
             -H "Expect:" \
-            --data-binary "@$USERDATA_PATH/$PAK_NAME/roms.txt" \
+            --data-binary "@$SDCARD_PATH/roms.txt" \
             https://minuicm.com/api/generateUrl)
 
+        qr_file="$USERDATA_PATH/$PAK_NAME/qr.png"
         url=$(echo "$response" | sed -n '1p')
-        echo "$response" | sed -n '2p' | base64 -d >"$USERDATA_PATH/$PAK_NAME/qr.png"
+        echo "$response" | sed -n '2p' | base64 -d >"$qr_file"
 
-        show_qr "$url"
+        show_qr "$url" "$qr_file"
     fi
 }
 
