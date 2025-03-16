@@ -1,5 +1,9 @@
 {
     "label": "Collection Manager",
     "launch": "launch.sh",
-    "description": "Manage collections"
+    "description": "Manage collections",
+    "platforms": [
+        "rg35xxplus",
+        "tg5040"
+    ]
 }
