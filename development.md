@@ -23,4 +23,4 @@ This will trigger a release workflow on Github Actions.
 
 ### Automatic Release
 
-After at least 1 release exists, you can run the `bump-version` workflow manually in the Github Actions tab. This workflow requires a MINUI_ACCESS_TOKEN environment variable to be set in the repository secrets.
+After at least 1 release exists, you can run the `RELEASE` workflow manually in the Github Actions tab.
